@@ -79,15 +79,22 @@ gr_sum <- gros_rouleurs %>%
   arrange(desc(sommeMoto))
 View(gr_sum)
 
+moyenne_km_an <- 17000
 sup <- gr_sum %>% 
   group_by(sommeMoto) %>%
-  filter(sommeMoto >= 17000)
+  filter(sommeMoto >= moyenne_km_an)
 inf <- gr_sum %>% 
   group_by(sommeMoto) %>%
-  filter(sommeMoto < 17000)
+  filter(sommeMoto < moyenne_km_an)
 
 View(sup)
 View(inf)
+
+#TODO: afficher la part de gros rouleurs en moto 
+#les gros rouleurs en voiture,
+#les gros rouleurs en moto qui sont des gros rouleurs en voiture
+#les gros rouleurs en voiture qui sont des gros rouleurs en moto
+#à partir de ces diagrammes et calculs on déduit le reste
 
 #################################################################################
 #----- Diagramme des gros rouleurs en auto parmis les gros rouleurs en moto-----#
