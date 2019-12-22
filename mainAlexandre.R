@@ -181,13 +181,13 @@ for(i in 2:6){
 }
 res.mca <- MCA(type_rouleur2[,2:6])
 plot(res.mca,invisible=c("ind"))
-plot(res.mca,axes = c(1,3),invisible=c("ind"))
-#tab_situation_familiale_moto <- table(type_rouleur$situation_familiale,type_rouleur$type_moto,type_rouleur$type_auto)
-#chisq <- chisq.test(tab_situation_familiale_moto)
-#chisq
-#tab_situation_familiale_moto <- rprop(tab_situation_familiale_moto)
-#tab_situation_familiale_moto
-#res.ca <- MCA(type_rouleur2[,2:6])
+
+tab_situation_familiale_moto <- table(type_rouleur$situation_familiale,type_rouleur$type_moto,type_rouleur$type_auto)
+chisq <- chisq.test(tab_situation_familiale_moto)
+chisq
+tab_situation_familiale_moto <- rprop(tab_situation_familiale_moto)
+tab_situation_familiale_moto
+res.ca <- MCA(type_rouleur2[,2:6])
 
 ###############
 
