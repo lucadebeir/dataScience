@@ -145,3 +145,57 @@ to_readable_moto_vector <- Vectorize(to_readable_moto, vectorize.args = "code")
 usages <- usages %>% 
   mutate(Usage_auto = to_readable_auto_vector(usage_auto)) %>%
   mutate(Usage_moto = to_readable_moto_vector(usage_moto1))
+
+usageAutoPersonnelGlobal <- sum(usages['Usage_auto'] == 'Personnel')
+usageAutoDomicileTravailGlobal <- sum(usages['Usage_auto'] == 'Domicile-travail')
+usageAutoTravailGlobal <- sum(usages['Usage_auto'] == 'Travail')
+usageAutoCourseGlobal <- sum(usages['Usage_auto'] == 'Courses')
+nbUsager <- usageAutoPersonnelGlobal+usageAutoDomicileTravailGlobal+usageAutoTravailGlobal+usageAutoCourseGlobal
+
+usageMotoPersonnelGlobal <- sum(usages['Usage_moto'] == 'Personnel')
+usageMotoDomicileTravailGlobal <- sum(usages['Usage_moto'] == 'Domicile-travail')
+usageMotoTravailGlobal <- sum(usages['Usage_moto'] == 'Travail')
+
+#Camembert usage principal auto
+usagePrincipalAuto <- data.frame(
+  group = c("Personnel", "Domicile-travail", "Travail", "Courses"),
+  value = c(round((usageAutoPersonnelGlobal/nbUsager),4), round((usageAutoDomicileTravailGlobal/nbUsager),4), 
+            round((usageAutoTravailGlobal/nbUsager),4), round((usageAutoCourseGlobal/nbUsager),4))
+)
+
+library(extrafont)
+
+loadfonts(device="win")
+
+usagePrincipalAuto$group <- factor(usagePrincipalAuto$group, levels = rev(usagePrincipalAuto$group))
+
+
+ggplot(data = usagePrincipalAuto, mapping = aes(x = factor(1), y = value, fill = group)) +
+  geom_bar(width=1, stat = "identity") +
+  coord_polar(theta = "y") + 
+  scale_fill_brewer(type = "seq",direction = -1, palette= "YlGnBu", guide = F) +
+  geom_text(aes(x = c(1.3, 1.5, 1.3, 1.3), 
+                y = value/2 + c(0, cumsum(value)[-length(value)]), 
+                label=paste(group,"\n",value*100, "%")), family = "Consolas")
+
+#Camembert usage principal moto
+usagePrincipalMoto <- data.frame(
+  group = c("Domicile-travail", "Travail", "Personnel"),
+  value = c(round((usageMotoDomicileTravailGlobal/nbUsager),4), round((usageMotoTravailGlobal/nbUsager),4),
+            round((usageMotoPersonnelGlobal/nbUsager),4))
+)
+
+library(extrafont)
+
+loadfonts(device="win")
+
+usagePrincipalMoto$group <- factor(usagePrincipalMoto$group, levels = rev(usagePrincipalMoto$group))
+
+
+ggplot(data = usagePrincipalMoto, mapping = aes(x = factor(1), y = value, fill = group)) +
+  geom_bar(width=1, stat = "identity") +
+  coord_polar(theta = "y") + 
+  scale_fill_brewer(type = "seq",direction = -1, palette= "YlGnBu", guide = F) +
+  geom_text(aes(x = c(1.3, 1.5, 1.3), 
+                y = value/2 + c(0, cumsum(value)[-length(value)]), 
+                label=paste(group,"\n",value*100, "%")), family = "Consolas")
