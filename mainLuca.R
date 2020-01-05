@@ -393,5 +393,122 @@ resCA<-CA(tabContingence)
 
 ########AFC des familles
 
+seulSansEnfantGrosRouleurAuto <- 0
+seulAvecEnfantGrosRouleurAuto <- 0
+enCoupleSansEnfantGrosRouleurAuto <- 0
+enCoupleAvecEnfantGrosRouleurAuto <- 0
+
+seulSansEnfantGrosRouleurMoto <- 0
+seulAvecEnfantGrosRouleurMoto <- 0
+enCoupleSansEnfantGrosRouleurMoto <- 0
+enCoupleAvecEnfantGrosRouleurMoto <- 0
+
+seulSansEnfantPetitRouleurAuto <- 0
+seulAvecEnfantPetitRouleurAuto <- 0
+enCoupleSansEnfantPetitRouleurAuto <- 0
+enCoupleAvecEnfantPetitRouleurAuto <- 0
+
+seulSansEnfantPetitRouleurMoto <- 0
+seulAvecEnfantPetitRouleurMoto <- 0
+enCoupleSansEnfantPetitRouleurMoto <- 0
+enCoupleAvecEnfantPetitRouleurMoto <- 0
+
+autreAutoGrosRouleur <- 0
+autreAutoPetitRouleur <- 0
+autreMotoGrosRouleur <- 0
+autreMotoPetitRouleur <- 0
+
+situation_familiale <- function(num){
+  if (num == "1")
+    return ("Seul(e) sans enfant")
+  if (num == "2")
+    return ("Seul(e) avec enfant(s)")
+  if (num == "3")
+    return ("En couple sans enfant")
+  if (num == "4")
+    return ("En couple avec enfant(s)")
+  if (num == "5")
+    return ("Autre")
+}
+
+for (i in 1:nrow(bdd))
+  if (situation_familiale(bdd$`Situation familiale`[i]) == "Seul(e) sans enfant") {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      seulSansEnfantGrosRouleurAuto <- seulSansEnfantGrosRouleurAuto + 1
+    } else {
+      seulSansEnfantPetitRouleurAuto <- seulSansEnfantPetitRouleurAuto + 1
+    }
+  } else if (situation_familiale(bdd$`Situation familiale`[i]) == "Seul(e) avec enfant(s)") {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      seulAvecEnfantGrosRouleurAuto <- seulAvecEnfantGrosRouleurAuto + 1
+    } else {
+      seulAvecEnfantPetitRouleurAuto <- seulAvecEnfantPetitRouleurAuto + 1
+    }
+  } else if (situation_familiale(bdd$`Situation familiale`[i]) == "En couple sans enfant") {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      enCoupleSansEnfantGrosRouleurAuto <- enCoupleSansEnfantGrosRouleurAuto + 1
+    } else {
+      enCoupleSansEnfantPetitRouleurAuto <- enCoupleSansEnfantPetitRouleurAuto + 1
+    }
+  } else if (situation_familiale(bdd$`Situation familiale`[i]) == "En couple avec enfant(s)") {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      enCoupleAvecEnfantGrosRouleurAuto <- enCoupleAvecEnfantGrosRouleurAuto + 1
+    } else {
+      enCoupleAvecEnfantPetitRouleurAuto <- enCoupleAvecEnfantPetitRouleurAuto + 1
+    }
+  } else {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      autreAutoGrosRouleur <- autreAutoGrosRouleur + 1
+    } else {
+      autreAutoPetitRouleur <- autreAutoPetitRouleur + 1
+    }
+  }
+
+for (i in 1:nrow(bdd))  
+  if (situation_familiale(bdd$`Situation familiale`[i]) == "Seul(e) sans enfant") {
+    if (repartitionRouleur(strtoi(bdd$`Nb km 1`[i])) == 1) {
+      seulSansEnfantGrosRouleurMoto <- seulSansEnfantGrosRouleurMoto + 1
+    } else {
+      seulSansEnfantPetitRouleurMoto <- seulSansEnfantPetitRouleurMoto + 1
+    }
+  } else if (situation_familiale(bdd$`Situation familiale`[i]) == "Seul(e) avec enfant(s)") {
+    if (repartitionRouleur(strtoi(bdd$`Nb km 1`[i])) == 1) {
+      seulAvecEnfantGrosRouleurMoto <- seulAvecEnfantGrosRouleurMoto + 1
+    } else {
+      seulAvecEnfantPetitRouleurMoto <- seulAvecEnfantPetitRouleurMoto + 1
+    }
+  } else if (situation_familiale(bdd$`Situation familiale`[i]) == "En couple sans enfant") {
+    if (repartitionRouleur(strtoi(bdd$`Nb km 1`[i])) == 1) {
+      enCoupleSansEnfantGrosRouleurMoto <- enCoupleSansEnfantGrosRouleurMoto + 1
+    } else {
+      enCoupleSansEnfantPetitRouleurMoto <- enCoupleSansEnfantPetitRouleurMoto + 1
+    }
+  } else if (situation_familiale(bdd$`Situation familiale`[i]) == "En couple avec enfant(s)") {
+    if (repartitionRouleur(strtoi(bdd$`Nb km 1`[i])) == 1) {
+      enCoupleAvecEnfantGrosRouleurMoto <- enCoupleAvecEnfantGrosRouleurMoto + 1
+    } else {
+      enCoupleAvecEnfantPetitRouleurMoto <- enCoupleAvecEnfantPetitRouleurMoto + 1
+    }
+  } else {
+    if (repartitionRouleur(strtoi(bdd$`Nb km 1`[i])) == 1) {
+      autreMotoGrosRouleur <- autreMotoGrosRouleur + 1
+    } else {
+      autreMotoPetitRouleur <- autreMotoPetitRouleur + 1
+    }
+  }
 
 
+tabContingenceFamille <- data.frame(
+  SeulSansEnfant=c(seulSansEnfantGrosRouleurAuto,seulSansEnfantGrosRouleurMoto,
+              seulSansEnfantPetitRouleurAuto,seulSansEnfantPetitRouleurMoto), 
+  SeulAvecEnfant=c(seulAvecEnfantGrosRouleurAuto,seulAvecEnfantGrosRouleurMoto,
+                   seulAvecEnfantPetitRouleurAuto,seulAvecEnfantPetitRouleurMoto),
+  EnCoupleSansEnfant=c(enCoupleSansEnfantGrosRouleurAuto,enCoupleSansEnfantGrosRouleurMoto,
+                    enCoupleSansEnfantPetitRouleurAuto,enCoupleSansEnfantPetitRouleurMoto), 
+  EnCoupleAvecEnfant=c(enCoupleAvecEnfantGrosRouleurAuto,enCoupleAvecEnfantGrosRouleurMoto,
+            enCoupleAvecEnfantPetitRouleurAuto,enCoupleAvecEnfantPetitRouleurMoto), 
+  Autre=c(autreAutoGrosRouleur,autreMotoGrosRouleur,autreAutoPetitRouleur,autreMotoPetitRouleur),
+  row.names=c("Gros rouleur Auto", "Gros rouleur Moto", "Petit rouleur Auto", "Petit rouleur Moto")
+)
+
+resAFCFamille <- CA(tabContingenceFamille)
