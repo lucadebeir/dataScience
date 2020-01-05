@@ -199,3 +199,199 @@ ggplot(data = usagePrincipalMoto, mapping = aes(x = factor(1), y = value, fill =
   geom_text(aes(x = c(1.3, 1.5, 1.3), 
                 y = value/2 + c(0, cumsum(value)[-length(value)]), 
                 label=paste(group,"\n",value*100, "%")), family = "Consolas")
+
+
+#Camembert usage global auto
+usageGlobalAutoPerso <- round(((usageVoiture[1,][2]+usageVoiture[5,][2]+usageVoiture[6,][2])/usageVoiture[7,][2]),4)
+usageGlobalAutoDT <- round((usageVoiture[2,][2]/usageVoiture[7,][2]),4)
+usageGlobalAutoT <- round((usageVoiture[3,][2]/usageVoiture[7,][2]),4)
+usageGlobalAutoC <- round((usageVoiture[4,][2]/usageVoiture[7,][2]),4)
+
+usageGlobalAuto <- data.frame(
+  group = c("Personnel", "Domicile-travail", "Travail", "Courses"),
+  value = c(usageGlobalAutoPerso[1,], 
+            usageGlobalAutoDT[1,], 
+            usageGlobalAutoT[1,], 
+            usageGlobalAutoC[1,])
+)
+
+library(extrafont)
+
+loadfonts(device="win")
+
+usageGlobalAuto$group <- factor(usageGlobalAuto$group, levels = rev(usageGlobalAuto$group))
+
+
+ggplot(data = usageGlobalAuto, mapping = aes(x = factor(1), y = value, fill = group)) +
+  geom_bar(width=1, stat = "identity") +
+  coord_polar(theta = "y") + 
+  scale_fill_brewer(type = "seq",direction = -1, palette= "YlGnBu", guide = F) +
+  geom_text(aes(x = c(1.3, 1.5, 1.3, 1.3), 
+                y = value/2 + c(0, cumsum(value)[-length(value)]), 
+                label=paste(group,"\n",value*100, "%")), family = "Consolas")
+
+
+
+
+
+######## Données pour diviser les individus en 2 groupes (gros rouleur VS petit rouleur) ############
+
+grosRouleurAuto <- 0
+grosRouleurMoto <- 0
+petitRouleurAuto <- 0
+petitRouleurMoto <- 0
+
+
+
+repartitionRouleur <- function(code) {
+  if (code > 17000)
+    return (1)
+  else
+    return (0)
+}
+
+for (i in (bdd$`Q17 [1]`))
+  if (repartitionRouleur(strtoi(i)) == 1) {
+    grosRouleurAuto <- grosRouleurAuto + 1
+  } else {
+    petitRouleurAuto <- petitRouleurAuto + 1
+  }
+
+    
+for (i in (bdd$`Nb km 1`))
+  if (repartitionRouleur(strtoi(i)) == 1) {
+    grosRouleurMoto <- grosRouleurMoto + 1
+  } else {
+    petitRouleurMoto <- petitRouleurMoto + 1
+  }
+
+
+### Tableau de contingence ####
+
+usageAutoPersonnelGrosRouleur <- 0
+usageAutoTravailGrosRouleur <- 0
+usageAutoDTGrosRouleur <- 0
+usageAutoCourseGrosRouleur <- 0
+
+usageAutoPersonnelPetitRouleur <- 0
+usageAutoTravailPetitRouleur <- 0
+usageAutoDTPetitRouleur <- 0
+usageAutoCoursePetitRouleur <- 0
+
+usageMotoPersonnelGrosRouleur <- 0
+usageMotoTravailGrosRouleur <- 0
+usageMotoDTGrosRouleur <- 0
+
+usageMotoPersonnelPetitRouleur <- 0
+usageMotoTravailPetitRouleur <- 0
+usageMotoDTPetitRouleur <- 0
+
+#répartition pour les voitures avec le premier choix coché
+
+#pas super mais pas le choix
+
+for (i in 1:nrow(bdd))
+  if (bdd$`Q15 [1]`[i] == 1 || bdd$`Q15 [1]`[i] == 5 || bdd$`Q15 [1]`[i] == 6) {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      usageAutoPersonnelGrosRouleur <- usageAutoPersonnelGrosRouleur + 1
+    } else {
+      usageAutoPersonnelPetitRouleur <- usageAutoPersonnelPetitRouleur + 1
+    }
+  } else if (bdd$`Q15 [1]`[i] == 2) {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      usageAutoDTGrosRouleur <- usageAutoDTGrosRouleur + 1
+    } else {
+      usageAutoDTPetitRouleur <- usageAutoDTPetitRouleur + 1
+    }
+  } else if (bdd$`Q15 [1]`[i] == 3) {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      usageAutoTravailGrosRouleur <- usageAutoTravailGrosRouleur + 1
+    } else {
+      usageAutoTravailPetitRouleur <- usageAutoTravailPetitRouleur + 1
+    }
+  } else {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      usageAutoCourseGrosRouleur <- usageAutoCourseGrosRouleur + 1
+    } else {
+      usageAutoCoursePetitRouleur <- usageAutoCoursePetitRouleur + 1
+    }
+  }
+  
+for (i in 1:nrow(bdd))  
+  if (bdd$`Usage 1`[i] == 1) {
+    if (repartitionRouleur(strtoi(bdd$`Nb km 1`[i])) == 1) {
+      usageMotoPersonnelGrosRouleur <- usageMotoPersonnelGrosRouleur + 1
+    } else {
+      usageMotoPersonnelPetitRouleur <- usageMotoPersonnelPetitRouleur + 1
+    }
+  } else if (bdd$`Usage 1`[i] == 2) {
+    if (repartitionRouleur(strtoi(bdd$`Nb km 1`[i])) == 1) {
+      usageMotoDTGrosRouleur <- usageMotoDTGrosRouleur + 1
+    } else {
+      usageMotoDTPetitRouleur <- usageMotoDTPetitRouleur + 1
+    }
+  } else {
+    if (repartitionRouleur(strtoi(bdd$`Nb km 1`[i])) == 1) {
+      usageMotoTravailGrosRouleur <- usageMotoTravailGrosRouleur + 1
+    } else {
+      usageMotoTravailPetitRouleur <- usageMotoTravailPetitRouleur + 1
+    }
+  }
+
+
+## Création du tableau de contingence ##
+
+tabContingence <- data.frame(
+             AutoUPersonnel=c(usageAutoPersonnelGrosRouleur,usageAutoPersonnelPetitRouleur), 
+             AutoUDT=c(usageAutoDTGrosRouleur,usageAutoDTPetitRouleur), 
+             AutoUTravail=c(usageAutoTravailGrosRouleur, usageAutoTravailPetitRouleur), 
+             AutoUCourse=c(usageAutoCourseGrosRouleur,usageAutoCoursePetitRouleur),
+             MotoUPersonnel=c(usageMotoPersonnelGrosRouleur,usageMotoPersonnelPetitRouleur), 
+             MotoUDT=c(usageMotoDTGrosRouleur,usageMotoDTPetitRouleur), 
+             MotoUTravail=c(usageMotoTravailGrosRouleur, usageMotoTravailPetitRouleur),
+             row.names=c("Gros rouleur","Petit rouleur")
+)
+
+tabContingenceAvecSomme <- data.frame(
+  AutoUPersonnel=c(usageAutoPersonnelGrosRouleur,usageAutoPersonnelPetitRouleur,usageAutoPersonnelGlobal), 
+  AutoUDT=c(usageAutoDTGrosRouleur,usageAutoDTPetitRouleur,usageAutoDomicileTravailGlobal), 
+  AutoUTravail=c(usageAutoTravailGrosRouleur, usageAutoTravailPetitRouleur,usageAutoTravailGlobal), 
+  AutoUCourse=c(usageAutoCourseGrosRouleur,usageAutoCoursePetitRouleur,usageAutoCourseGlobal),
+  MotoUPersonnel=c(usageMotoPersonnelGrosRouleur,usageMotoPersonnelPetitRouleur,usageMotoPersonnelGlobal), 
+  MotoUDT=c(usageMotoDTGrosRouleur,usageMotoDTPetitRouleur,usageMotoDomicileTravailGlobal), 
+  MotoUTravail=c(usageMotoTravailGrosRouleur, usageMotoTravailPetitRouleur,usageMotoTravailGlobal),
+  Somme=c(grosRouleurAuto+grosRouleurMoto,petitRouleurAuto+petitRouleurMoto,
+          grosRouleurAuto+grosRouleurMoto+petitRouleurAuto+petitRouleurMoto),
+  row.names=c("Gros rouleur","Petit rouleur", "Somme")
+)
+
+resCA <- CA(tabContingence)
+#une seule dimension -> sert à R..
+
+
+
+
+
+
+############# Nouvel essai
+
+tabContingence <- data.frame(
+  Personnel=c(usageAutoPersonnelGrosRouleur,usageMotoPersonnelGrosRouleur,
+              usageAutoPersonnelPetitRouleur,usageMotoPersonnelPetitRouleur), 
+  DomicileTravail=c(usageAutoDTGrosRouleur,usageMotoDTGrosRouleur,
+            usageAutoDTPetitRouleur,usageMotoDTPetitRouleur), 
+  Travail=c(usageAutoTravailGrosRouleur,usageMotoTravailGrosRouleur,
+            usageAutoTravailPetitRouleur,usageMotoTravailPetitRouleur), 
+  row.names=c("Gros rouleur Auto", "Gros rouleur Moto", "Petit rouleur Auto", "Petit rouleur Moto")
+)
+
+resCA<-CA(tabContingence)
+####c'est good
+
+
+
+
+########AFC des familles
+
+
+
