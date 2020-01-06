@@ -12,8 +12,8 @@ library("readxl")
 library(ggplot2)
 library(dplyr)
 
-bdd_auto <- read_excel("C:/Users/alexa/Documents/R/dataScience/Data/bdd_auto-modif.xlsx")
-bdd_2_roue <- read_excel("C:/Users/alexa/Documents/R/dataScience/Data/bdd_2_roue.xls")
+bdd_auto <- read_excel("bdd_auto-modif.xlsx")
+bdd_2_roue <- read_excel("bdd_2_roue.xls")
 colnames(bdd_2_roue)[colnames(bdd_2_roue)=="...1"] <- "Identifiant"
 colnames(bdd_2_roue)[colnames(bdd_2_roue)=="...2"] <- "Date"
 bdd <- merge(bdd_auto, bdd_2_roue, by="Identifiant")
@@ -129,7 +129,6 @@ situation_famille <- type_rouleur %>%
               moy_km_total = round(mean(kmTotaux),2)
     ) %>%
     filter(Nombre_enfants < 10)
-View(situation_famille)
 
 ##################################################
 # Define server logic required to draw a histogram

@@ -21,8 +21,8 @@ shinyUI(
                 tabPanel("Frequence",
                          wellPanel(
                              radioButtons("separation", "Kilometrage de separation des types de rouleurs:",
-                                          c("Moyenne de l'echantillon" = "27718.2",
-                                            "Moyenne francaise" = "17000")
+                                          c("Par rapport a la moyenne de l'echantillon" = "27718.2",
+                                            "Par rapport a la moyenne francaise" = "17000")
                              )
                          ),
                          tabsetPanel(

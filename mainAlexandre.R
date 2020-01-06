@@ -353,5 +353,8 @@ usages_auto <- usages2 %>%
 View(usages_moto)
 View(usages_auto)
 
-
-
+#pour le shiny
+install.packages('rsconnect')
+rsconnect::setAccountInfo(name='alexandre-girbal', token='88473132B41811FD4E0A74D0940E27B0', secret='L1NxfLIo5atZC3eEgF41F9JTgJUz5p2V9VbcPzGe')
+library(rsconnect)
+rsconnect::deployApp('C:\Users\alexa\Documents\R\dataScience\Shiny-Web-App')
