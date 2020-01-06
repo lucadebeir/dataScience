@@ -97,7 +97,6 @@ usageVoiture <-  rbind(usage1,usage2) %>% rbind(usage3) %>% rbind(usage4) %>% rb
         summarise("Voiture"= n())
 View(usageVoiture)
 
-
 #regrouper les type d'utilisation des voiture pour qu'ils correspondent au moto
 usageVoiture[1,2] <- usageVoiture[1,2] + usageVoiture[5,2] + usageVoiture[6,2]
 
@@ -173,7 +172,7 @@ AFC_usage[,6] <- usageMoto5[,2]
 
 #on enlève les course, on pourra essayer en les rajoutant
 AFC_usage <- AFC_usage[1:3,]
-rownames(AFC_usage) <- c("Personnel","Domicile-travail", "Travail")
+rownames(AFC_usage) <- c("Loisir","Domicile-travail", "Travail")
 
 # 1. convertir les données en tant que table
 dt <- as.table(as.matrix (AFC_usage))
@@ -206,6 +205,13 @@ fviz_contrib(res_AFC, choice = "row", axes = 2, top = 10)
 # repel = TRUE pour éviter le chevauchement de texte
 fviz_ca_biplot (res_AFC)
 ggplot(res_AFC)
+
+
+
+
+
+
+
 
 #----- Usage table -----#
 
@@ -267,3 +273,85 @@ usage_readable <- usage %>%
 
 View(usage)
 View(usage_readable)
+
+
+#-- données usage plot introduction --#
+
+usageVoiturePLot <- usageVoiture[1:3,2] 
+usageVoiturePLot <- mutate(usageVoiturePLot ,prop = round(Voiture / sum(usageVoiturePLot$Voiture) *100,2))%>%
+                    mutate(ypos = cumsum(prop)- 0.5*prop ) 
+
+dt <- data.frame(
+  type =  c("Loisir","Domicile-travail", "Travail"),
+  value = usageVoiturePLot[,1],
+  prop = usageVoiturePLot[,2],
+  ypos = usageVoiturePLot[,3]
+)
+
+#On ne met rien sur l'axe x pour pouvoir en faire un cercle
+diag_intro <- ggplot(dt, aes(x = "", y = prop, fill = factor(type))) + 
+  geom_bar(width = 1,stat = "identity") + 
+  theme_void() +
+  labs(fill="Type d'usage", 
+       x=NULL, 
+       y=NULL, 
+       title="Répartition des usages des autos", 
+       caption="Figure 1: Diagramme R, répartition des usages des autos") +
+  geom_text(aes(y = ypos, label = prop), color = "white", size=5,check_overlap = TRUE) +
+  scale_fill_brewer(palette="Dark2") +
+  coord_polar("y", start=0)
+diag_intro
+
+
+usageMotoPLot <- usageMoto[1:3,2]
+usageMotoPLot <- mutate(usageMotoPLot ,prop = round(Nombre_de_personnes / sum(usageMotoPLot$Nombre_de_personnes) *100,2))%>%
+  mutate(ypos = cumsum(prop)- 0.5*prop ) 
+
+dtm <- data.frame(
+  type =  c("Loisir","Domicile-travail", "Travail"),
+  value = usageMotoPLot[,1],
+  prop = usageMotoPLot[,2],
+  ypos = usageMotoPLot[,3]
+)
+
+#On ne met rien sur l'axe x pour pouvoir en faire un cercle
+diag_intro_moto <- ggplot(dtm, aes(x = "", y = prop, fill = factor(type))) + 
+  geom_bar(width = 1,stat = "identity") + 
+  theme_void() +
+  labs(fill="Type d'usage", 
+       x=NULL, 
+       y=NULL, 
+       title="Répartition des usages des motos", 
+       caption="Figure 2: Diagramme R, répartition des usages des motos") +
+  geom_text(aes(y = ypos, label = prop), color = "white", size=5,check_overlap = TRUE) +
+  scale_fill_brewer(palette="Dark2") +
+  coord_polar("y", start=0)
+diag_intro_moto
+
+
+usagePLot <- usageMoto[1:3,2] + usageVoiture[1:3,2]
+usagePLot <- mutate(usagePLot ,prop = round(Nombre_de_personnes / sum(usagePLot$Nombre_de_personnes) *100,2))%>%
+  mutate(ypos = cumsum(prop)- 0.5*prop ) 
+usagePLot
+dtall <- data.frame(
+  type =  c("Loisir","Domicile-travail", "Travail"),
+  value = usagePLot[,1],
+  prop = usagePLot[,2],
+  ypos = usagePLot[,3]
+)
+
+#On ne met rien sur l'axe x pour pouvoir en faire un cercle
+diag_intro_moto <- ggplot(dtall, aes(x = "", y = prop, fill = factor(type))) + 
+  geom_bar(width = 1,stat = "identity") + 
+  theme_void() +
+  labs(fill="Type d'usage", 
+       x=NULL, 
+       y=NULL, 
+       title="Répartition des usages pour les motos et les autos", 
+       caption="Figure 2: Diagramme R, répartition des usages pour les motos et les autos") +
+  geom_text(aes(y = ypos, label = prop), color = "white", size=5,check_overlap = TRUE) +
+  scale_fill_brewer(palette="Dark2") +
+  coord_polar("y", start=0)
+diag_intro_moto
+
+
