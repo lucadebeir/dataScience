@@ -178,6 +178,9 @@ ggplot(data = usagePrincipalAuto, mapping = aes(x = factor(1), y = value, fill =
                 y = value/2 + c(0, cumsum(value)[-length(value)]), 
                 label=paste(group,"\n",value*100, "%")), family = "Consolas")
 
+#############################################################
+#############################################################
+#############################################################
 #Camembert usage principal moto
 usagePrincipalMoto <- data.frame(
   group = c("Domicile-travail", "Travail", "Personnel"),
@@ -199,7 +202,9 @@ ggplot(data = usagePrincipalMoto, mapping = aes(x = factor(1), y = value, fill =
   geom_text(aes(x = c(1.3, 1.5, 1.3), 
                 y = value/2 + c(0, cumsum(value)[-length(value)]), 
                 label=paste(group,"\n",value*100, "%")), family = "Consolas")
-
+#############################################################
+#############################################################
+#############################################################
 
 #Camembert usage global auto
 usageGlobalAutoPerso <- round(((usageVoiture[1,][2]+usageVoiture[5,][2]+usageVoiture[6,][2])/usageVoiture[7,][2]),4)
@@ -369,27 +374,35 @@ resCA <- CA(tabContingence)
 #une seule dimension -> sert à R..
 
 
+#
 
+###############
 
-
-
-############# Nouvel essai
-
-tabContingence <- data.frame(
-  Personnel=c(usageAutoPersonnelGrosRouleur,usageMotoPersonnelGrosRouleur,
-              usageAutoPersonnelPetitRouleur,usageMotoPersonnelPetitRouleur), 
-  DomicileTravail=c(usageAutoDTGrosRouleur,usageMotoDTGrosRouleur,
-            usageAutoDTPetitRouleur,usageMotoDTPetitRouleur), 
-  Travail=c(usageAutoTravailGrosRouleur,usageMotoTravailGrosRouleur,
-            usageAutoTravailPetitRouleur,usageMotoTravailPetitRouleur), 
-  row.names=c("Gros rouleur Auto", "Gros rouleur Moto", "Petit rouleur Auto", "Petit rouleur Moto")
+tabContingenceAuto <- data.frame(
+  Personnel=c(usageAutoPersonnelGrosRouleur,
+              usageAutoPersonnelPetitRouleur), 
+  DomicileTravail=c(usageAutoDTGrosRouleur,
+                    usageAutoDTPetitRouleur), 
+  Travail=c(usageAutoTravailGrosRouleur,
+            usageAutoTravailPetitRouleur),
+  Course=c(usageAutoCourseGrosRouleur,
+           usageAutoCoursePetitRouleur),
+  row.names=c("Gros rouleur Auto", "Petit rouleur Auto")
 )
 
-resCA<-CA(tabContingence)
-####c'est good
+resCA<-CA(tabContingenceAuto)
 
+tabContingenceMoto <- data.frame(
+  Personnel=c(usageMotoPersonnelGrosRouleur,
+              usageMotoPersonnelPetitRouleur), 
+  DomicileTravail=c(usageMotoDTGrosRouleur,
+                    usageMotoDTPetitRouleur), 
+  Travail=c(usageMotoTravailGrosRouleur,
+            usageMotoTravailPetitRouleur), 
+  row.names=c("Gros rouleur Moto", "Petit rouleur Moto")
+)
 
-
+resCA<-CA(tabContingenceMoto)
 
 ########AFC des familles
 
@@ -512,3 +525,44 @@ tabContingenceFamille <- data.frame(
 )
 
 resAFCFamille <- CA(tabContingenceFamille)
+
+
+
+###### AFC rouleur auto/moto
+
+GrosRouleurAutoetMoto <- 0
+GrosRouleurAutoetPetitRouleurMoto <- 0
+GrosRouleurMotoetPetitRouleurAuto <- 0
+PetitRouleurAutoetMoto <- 0
+
+for (i in 1:nrow(bdd))
+  if (repartitionRouleur(strtoi(bdd$`Nb km 1`[i])) == 1) {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      GrosRouleurAutoetMoto <- GrosRouleurAutoetMoto + 1
+    } else {
+      GrosRouleurMotoetPetitRouleurAuto <- GrosRouleurMotoetPetitRouleurAuto + 1
+    }
+  } else if (repartitionRouleur(strtoi(bdd$`Nb km 1`[i])) == 0) {
+    if (repartitionRouleur(strtoi(bdd$`Q17 [1]`[i])) == 1) {
+      GrosRouleurAutoetPetitRouleurMoto <- GrosRouleurAutoetPetitRouleurMoto + 1
+    } else {
+      PetitRouleurAutoetMoto <- PetitRouleurAutoetMoto + 1
+    }
+  }
+
+tabContingenceRouleur <- data.frame(
+  GrosRouleurAuto=c(GrosRouleurAutoetMoto,GrosRouleurAutoetPetitRouleurMoto), 
+  PetitRouleurAuto=c(GrosRouleurMotoetPetitRouleurAuto,PetitRouleurAutoetMoto),
+  row.names=c("GrosRouleurMoto", "PetitRouleurMoto")
+)
+
+tabContingenceRouleur2 <- data.frame(
+  Auto=c(grosRouleurAuto,petitRouleurAuto), 
+  Moto=c(grosRouleurMoto,petitRouleurMoto),
+  row.names=c("Gros rouleur", "Petit rouleur")
+)
+
+resAFCRouleur2 <- CA(tabContingenceRouleur2)
+
+
+
