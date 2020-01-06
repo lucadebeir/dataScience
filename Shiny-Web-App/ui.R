@@ -21,17 +21,34 @@ shinyUI(
                 tabPanel("Frequence",
                          wellPanel(
                              radioButtons("separation", "Kilometrage de separation des types de rouleurs:",
-                                          c("moyenne de l'echantillon" = "20000",
-                                            "moyenne francaise" = "17000")
+                                          c("Moyenne de l'echantillon" = "27718.2",
+                                            "Moyenne francaise" = "17000")
                              )
                          ),
                          tabsetPanel(
-                             tabPanel("Repartition des gros rouleurs", 
+                             tabPanel("Repartition des gros rouleurs",
                                       
-                             plotOutput("plot1")
+                                      plotOutput("plot1")
                              ),
-                             tabPanel("heheheh")
-                         )),
+                             tabPanel("Situation Maritale",
+                                      wellPanel(
+                                          radioButtons("km", "Km a comparer",
+                                                       c("Auto" = "moy_km_auto",
+                                                         "Moto" = "moy_km_moto",
+                                                         "Total" = "moy_km_total")
+                                          )),
+                                      plotOutput("plot2")
+                             ),
+                             tabPanel("Situation Familiale",
+                                      wellPanel(
+                                          radioButtons("kmFamille", "Km a comparer",
+                                                       c("Auto" = "moy_km_auto",
+                                                         "Moto" = "moy_km_moto",
+                                                         "Total" = "moy_km_total")
+                                          )),
+                                      plotOutput("plot3")
+                             )
+                          )),
                 tabPanel("Usages",
                          plotOutput(""))
                 

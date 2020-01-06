@@ -84,6 +84,11 @@ gr_sum <- gros_rouleurs %>%
   arrange(desc(kmMoto))
 View(gr_sum)
 
+gr_sum_total <- gr_sum %>%
+  mutate(kmTotaux = kmMoto + kmAuto)
+
+moyenne_km_an_echantillon <- mean(gr_sum_total$kmTotaux) #27718.2 km
+
 moyenne_km_an <- 17000
 
 #0=petit rouleur, 1= gros rouleur
@@ -128,15 +133,15 @@ situation_familiale_vector <- Vectorize(situation_familiale, vectorize.args = "n
 
 is_en_couple <- function(situation){
   if (situation == "Seul(e) sans enfant")
-    return (0)
+    return ("Celibataire")
   if (situation == "Seul(e) avec enfant(s)")
-    return (0)
+    return ("Celibataire")
   if (situation == "En couple sans enfant")
-    return (1)
+    return ("En couple")
   if (situation == "En couple avec enfant(s)")
-    return (1)
+    return ("En couple")
   if (situation == "Autre")
-    return (0)
+    return ("Celibataire")
   
 }
 is_en_couple_vector <- Vectorize(is_en_couple, vectorize.args = "situation")
@@ -156,16 +161,39 @@ hasEnfants <- function(situation){
 }
 hasEnfants_vector <- Vectorize(hasEnfants, vectorize.args = "situation")
 
-type_rouleur <- gr_sum %>% 
-  mutate(type_moto = isGrosRouleur_moto_vector(kmMoto)) %>%
-  mutate(type_auto = isGrosRouleur_auto_vector(kmAuto)) %>%
+type_rouleur <- gr_sum_total %>% 
+  mutate(gros_rouleur_moto = isGrosRouleur_moto_vector(kmMoto)) %>%
+  mutate(gros_rouleur_auto = isGrosRouleur_auto_vector(kmAuto)) %>%
   mutate(assure_mutuelle = isAssure_vector(Assure_Mutuelle)) %>%
   mutate(situation_familiale = situation_familiale_vector(Situation_familiale))%>%
   mutate(en_couple = is_en_couple_vector(situation_familiale)) %>%
   mutate(avec_enfant = hasEnfants_vector(situation_familiale)) %>%
-  select(Identifiant,type_moto,type_auto,assure_mutuelle,en_couple,avec_enfant)
+  select(Identifiant,gros_rouleur_moto,gros_rouleur_auto,assure_mutuelle,en_couple,avec_enfant,kmTotaux,kmAuto,kmMoto)
 
 View(type_rouleur)
+
+
+
+situation_couple <- type_rouleur %>%
+    group_by(en_couple) %>%
+    summarise(moy_km_moto = round(mean(kmAuto, na.rm=TRUE),2),
+              moy_km_auto = round(mean(kmMoto),2),
+              moy_km_total = round(mean(kmTotaux),2)
+              )
+View(situation_couple)
+
+kmEtudie <- situation_couple$moy_km_auto
+kmEtudie <- situation_couple$moy_km_moto
+
+ggplot(data=situation_couple, aes_string(x="en_couple", y=kmEtudie, fill = "en_couple")) +
+  geom_bar(stat="identity") +
+  scale_fill_brewer(palette="Set1") +
+  labs(fill="situation", 
+       x="Situation", 
+       y="Km", 
+       title="Moyenne de km parcourus en fonction de la situation maritale") +
+  geom_text(aes_string(y = kmEtudie / 2, label = kmEtudie ), color = "white", size=5) + 
+  theme(legend.position="none")
 
 #AFC######################
 install.packages(c("FactoMineR", "factoextra"))
@@ -182,7 +210,7 @@ for(i in 2:6){
 res.mca <- MCA(type_rouleur2[,2:6])
 plot(res.mca,invisible=c("ind"))
 
-tab_situation_familiale_moto <- table(type_rouleur$situation_familiale,type_rouleur$type_moto,type_rouleur$type_auto)
+tab_situation_familiale_moto <- table(type_rouleur$situation_familiale,type_rouleur$gros_rouleur_moto,type_rouleur$gros_rouleur_auto)
 chisq <- chisq.test(tab_situation_familiale_moto)
 chisq
 tab_situation_familiale_moto <- rprop(tab_situation_familiale_moto)
@@ -227,7 +255,7 @@ View(inf_auto)
 
 effectifs <- data.frame(stat=c("Total étudié","Gros rouleurs en moto","Petits rouleurs en moto","Gros rouleurs en auto","Petits rouleurs en auto"),
                            effectif=c(dim(bdd)[1],dim(sup_moto)[1],dim(inf_moto)[1],dim(sup_auto)[1],dim(inf_auto)[1]))
-effectifs
+View(effectifs)
 
 pourcentage_gros_rouleurs_fr <- effectifs[-5,][-3,][-1,] %>%
   mutate(pourcentage = round(effectif / dim(bdd)[1] * 100,2))
