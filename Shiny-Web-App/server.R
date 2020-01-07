@@ -12,8 +12,8 @@ library("readxl")
 library(ggplot2)
 library(dplyr)
 
-bdd_auto <- read_excel("bdd_auto-modif.xlsx")
-bdd_2_roue <- read_excel("bdd_2_roue.xls")
+bdd_auto <- read_excel("./bdd_auto-modif.xlsx")
+bdd_2_roue <- read_excel("./bdd_2_roue.xls")
 colnames(bdd_2_roue)[colnames(bdd_2_roue)=="...1"] <- "Identifiant"
 colnames(bdd_2_roue)[colnames(bdd_2_roue)=="...2"] <- "Date"
 bdd <- merge(bdd_auto, bdd_2_roue, by="Identifiant")
@@ -191,7 +191,7 @@ usagePrincipalMoto <- data.frame(
 
 library(extrafont)
 
-loadfonts(device="win")
+#loadfonts(device="win")
 
 usagePrincipalMoto$group <- factor(usagePrincipalMoto$group, levels = rev(usagePrincipalMoto$group))
 
@@ -210,7 +210,7 @@ usagePrincipalAuto <- data.frame(
 
 library(extrafont)
 
-loadfonts(device="win")
+#loadfonts(device="win")
 
 usagePrincipalAuto$group <- factor(usagePrincipalAuto$group, levels = rev(usagePrincipalAuto$group))
 
@@ -303,13 +303,13 @@ shinyServer(function(input, output) {
         ggplot(data = usagePrincipalMoto, mapping = aes(x = factor(1), y = value, fill = group)) +
           geom_bar(width=1, stat = "identity") +
           coord_polar(theta = "y") + 
-          scale_fill_brewer(type = "seq",direction = -1, palette= "YlGnBu", guide = F) +
+          scale_fill_brewer(palette="Set2") +
           labs(x=NULL, 
                y=NULL, 
                title="Usage principal de la moto en fonction de l'usage") +
           geom_text(aes(x = c(1.3, 1.5, 1.3), 
                         y = value/2 + c(0, cumsum(value)[-length(value)]), 
-                        label=paste(group,"\n",value*100, "%")), family = "Consolas") +
+                        label=paste(group,"\n",value*100, "%"))) +
             theme_void() +
             theme(plot.title = element_text(hjust = 0.5))
     })
@@ -318,10 +318,10 @@ shinyServer(function(input, output) {
         ggplot(data = usagePrincipalAuto, mapping = aes(x = factor(1), y = value, fill = group)) +
             geom_bar(width=1, stat = "identity") +
             coord_polar(theta = "y") + 
-            scale_fill_brewer(type = "seq",direction = -1, palette= "YlGnBu", guide = F) +
+            scale_fill_brewer(palette="Set2") +
             geom_text(aes(x = c(1.3, 1.5, 1.3, 1.3), 
                           y = value/2 + c(0, cumsum(value)[-length(value)]), 
-                          label=paste(group,"\n",value*100, "%")), family = "Consolas") +
+                          label=paste(group,"\n",value*100, "%"))) +
             labs(x=NULL, 
                  y=NULL, 
                  title="Usage principal de la voiture en fonction de l'usage") +
