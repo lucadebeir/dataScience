@@ -50,8 +50,15 @@ shinyUI(
                              )
                           )),
                 tabPanel("Usages",
-                         plotOutput(""))
-                
+                         tabsetPanel(
+                             tabPanel("Usages de la voiture",
+                                      plotOutput("plot4")
+                             ),
+                             tabPanel("Usages de la moto",
+                                      plotOutput("plot5")
+                             )
+                         )
+                )
             )
         )
     )

@@ -130,6 +130,100 @@ situation_famille <- type_rouleur %>%
     ) %>%
     filter(Nombre_enfants < 10)
 
+
+#################################################
+#LUCA
+#-----Divison des usages-----#
+usages <- bdd %>%
+    select(Identifiant, usage_auto="Q15 [1]",usage_moto1="Usage 1")
+usages[is.na(usages)] <- 0
+
+#fonctions pour transformer les donnees numériques en texte
+to_readable_auto <- function(code){
+    if (code == 1)
+        return ("Personnel")
+    if (code == 2)
+        return ("Domicile-travail")
+    if (code == 3)
+        return ("Travail")
+    if (code == 4)
+        return ("Courses")
+    if (code == 5)
+        return ("Personnel")
+    if (code == 6)
+        return ("Personnel")
+    
+}
+to_readable_auto_vector <- Vectorize(to_readable_auto, vectorize.args = "code")
+
+to_readable_moto <- function(code){
+    if (code == 0)
+        return ("Non renseigné")
+    if (code == 1)
+        return ("Personnel")
+    if (code == 2)
+        return ("Domicile-travail")
+    if (code == 3)
+        return ("Travail")
+}
+to_readable_moto_vector <- Vectorize(to_readable_moto, vectorize.args = "code")
+
+#tableau avec id + usage principal de l'auto et de la moto1
+usages <- usages %>% 
+    mutate(Usage_auto = to_readable_auto_vector(usage_auto)) %>%
+    mutate(Usage_moto = to_readable_moto_vector(usage_moto1))
+
+nbUsager <- nrow(bdd)
+
+usageMotoPersonnelGlobal <- sum(usages['Usage_moto'] == 'Personnel')
+usageMotoDomicileTravailGlobal <- sum(usages['Usage_moto'] == 'Domicile-travail')
+usageMotoTravailGlobal <- sum(usages['Usage_moto'] == 'Travail')
+
+#Camembert usage principal moto
+
+
+
+usagePrincipalMoto <- data.frame(
+    group = c("Domicile-travail", "Travail", "Personnel"),
+    value = c(round((usageMotoDomicileTravailGlobal/nbUsager),4), round((usageMotoTravailGlobal/nbUsager),4),
+              round((usageMotoPersonnelGlobal/nbUsager),4))
+)
+
+library(extrafont)
+
+loadfonts(device="win")
+
+usagePrincipalMoto$group <- factor(usagePrincipalMoto$group, levels = rev(usagePrincipalMoto$group))
+
+#############################################################
+usageAutoPersonnelGlobal <- sum(usages['Usage_auto'] == 'Personnel')
+usageAutoDomicileTravailGlobal <- sum(usages['Usage_auto'] == 'Domicile-travail')
+usageAutoTravailGlobal <- sum(usages['Usage_auto'] == 'Travail')
+usageAutoCourseGlobal <- sum(usages['Usage_auto'] == 'Courses')
+
+#Camembert usage principal auto
+usagePrincipalAuto <- data.frame(
+    group = c("Personnel", "Domicile-travail", "Travail", "Courses"),
+    value = c(round((usageAutoPersonnelGlobal/nbUsager),4), round((usageAutoDomicileTravailGlobal/nbUsager),4), 
+              round((usageAutoTravailGlobal/nbUsager),4), round((usageAutoCourseGlobal/nbUsager),4))
+)
+
+library(extrafont)
+
+loadfonts(device="win")
+
+usagePrincipalAuto$group <- factor(usagePrincipalAuto$group, levels = rev(usagePrincipalAuto$group))
+
+
+ggplot(data = usagePrincipalAuto, mapping = aes(x = factor(1), y = value, fill = group)) +
+    geom_bar(width=1, stat = "identity") +
+    coord_polar(theta = "y") + 
+    scale_fill_brewer(type = "seq",direction = -1, palette= "YlGnBu", guide = F) +
+    geom_text(aes(x = c(1.3, 1.5, 1.3, 1.3), 
+                  y = value/2 + c(0, cumsum(value)[-length(value)]), 
+                  label=paste(group,"\n",value*100, "%")), family = "Consolas")
+#############################################################
+########################################################
 ##################################################
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
@@ -169,7 +263,8 @@ shinyServer(function(input, output) {
                  y="%", 
                  title="Repartition du nombre de gros rouleurs en fonction du vehicule") +
             geom_text(aes(y = pourcentage / 2, label = pourcentage ), color = "white", size=5,check_overlap = TRUE)+ 
-            theme(legend.position="none")
+            theme(legend.position="none")+
+            theme(plot.title = element_text(hjust = 0.5))
     })
     
     output$plot2 <- renderPlot({
@@ -184,7 +279,8 @@ shinyServer(function(input, output) {
                  y="Km", 
                  title="Moyenne de km parcourus en fonction de la situation maritale") +
             geom_text(aes_string(y = 10000 , label = kmEtudie ), color = "white", size=5) + 
-            theme(legend.position="none")
+            theme(legend.position="none")+
+            theme(plot.title = element_text(hjust = 0.5))
     })
     
     output$plot3 <- renderPlot({
@@ -195,11 +291,42 @@ shinyServer(function(input, output) {
             geom_bar(stat="identity") +
             scale_fill_brewer(palette="Set2") +
             labs(fill="situation", 
-                 x="Situation", 
+                 x="Nombre d'enfants", 
                  y="Km", 
                  title="Moyenne de km parcourus en fonction de la situation familiale") +
             geom_text(aes_string(y = 7000 , label = kmEtudie ), color = "white", size=5) + 
-            theme(legend.position="none")
+            theme(legend.position="none")+
+            theme(plot.title = element_text(hjust = 0.5))
     })
-
+    
+    output$plot4 <- renderPlot({
+        ggplot(data = usagePrincipalMoto, mapping = aes(x = factor(1), y = value, fill = group)) +
+          geom_bar(width=1, stat = "identity") +
+          coord_polar(theta = "y") + 
+          scale_fill_brewer(type = "seq",direction = -1, palette= "YlGnBu", guide = F) +
+          labs(x=NULL, 
+               y=NULL, 
+               title="Usage principal de la moto en fonction de l'usage") +
+          geom_text(aes(x = c(1.3, 1.5, 1.3), 
+                        y = value/2 + c(0, cumsum(value)[-length(value)]), 
+                        label=paste(group,"\n",value*100, "%")), family = "Consolas") +
+            theme_void() +
+            theme(plot.title = element_text(hjust = 0.5))
+    })
+    
+    output$plot5 <- renderPlot({
+        ggplot(data = usagePrincipalAuto, mapping = aes(x = factor(1), y = value, fill = group)) +
+            geom_bar(width=1, stat = "identity") +
+            coord_polar(theta = "y") + 
+            scale_fill_brewer(type = "seq",direction = -1, palette= "YlGnBu", guide = F) +
+            geom_text(aes(x = c(1.3, 1.5, 1.3, 1.3), 
+                          y = value/2 + c(0, cumsum(value)[-length(value)]), 
+                          label=paste(group,"\n",value*100, "%")), family = "Consolas") +
+            labs(x=NULL, 
+                 y=NULL, 
+                 title="Usage principal de la voiture en fonction de l'usage") +
+            theme_void() +
+            theme(plot.title = element_text(hjust = 0.5))
+    })
+    
 })
