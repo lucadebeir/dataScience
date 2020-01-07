@@ -15,8 +15,6 @@ colnames(bdd_2_roue)[colnames(bdd_2_roue)=="...2"] <- "Date"
 
 #creation de la base de donnees conjointes (avec les personnes utilisant auto et 2-roue)
 bdd <- merge(bdd_auto, bdd_2_roue, by="Identifiant")
-View(bdd)
-str(bdd)
 
 #colnames(bdd_moto_2019)[colnames(bdd_moto_2019)=="IDENTIFIANT"] <- "Identifiant"
 #creation de la 2eme base en prenant en compte les donnees 2019
@@ -24,6 +22,7 @@ str(bdd)
 #View(bdd_2019)
 
 ################################################################
+
 #----- Installation des packages et chargement des library-----#
 install.packages("ggplot2")
 install.packages("dplyr")
@@ -105,7 +104,9 @@ usage <- bdd %>%
          usagev5="...88", kmv5="...90")
 
 
-
+####################################################################################################################################################
+####################################         USAGE PRINCIPAL DES MOTOS            ##################################################################
+####################################################################################################################################################
 #-----Divison des usages-----#
 usages <- bdd %>%
   select(Identifiant, usage_auto="Q15 [1]",usage_moto1="Usage 1")
@@ -146,15 +147,44 @@ usages <- usages %>%
   mutate(Usage_auto = to_readable_auto_vector(usage_auto)) %>%
   mutate(Usage_moto = to_readable_moto_vector(usage_moto1))
 
-usageAutoPersonnelGlobal <- sum(usages['Usage_auto'] == 'Personnel')
-usageAutoDomicileTravailGlobal <- sum(usages['Usage_auto'] == 'Domicile-travail')
-usageAutoTravailGlobal <- sum(usages['Usage_auto'] == 'Travail')
-usageAutoCourseGlobal <- sum(usages['Usage_auto'] == 'Courses')
-nbUsager <- usageAutoPersonnelGlobal+usageAutoDomicileTravailGlobal+usageAutoTravailGlobal+usageAutoCourseGlobal
+nbUsager <- nrow(bdd)
 
 usageMotoPersonnelGlobal <- sum(usages['Usage_moto'] == 'Personnel')
 usageMotoDomicileTravailGlobal <- sum(usages['Usage_moto'] == 'Domicile-travail')
 usageMotoTravailGlobal <- sum(usages['Usage_moto'] == 'Travail')
+
+#Camembert usage principal moto
+
+
+
+usagePrincipalMoto <- data.frame(
+  group = c("Domicile-travail", "Travail", "Personnel"),
+  value = c(round((usageMotoDomicileTravailGlobal/nbUsager),4), round((usageMotoTravailGlobal/nbUsager),4),
+            round((usageMotoPersonnelGlobal/nbUsager),4))
+)
+
+library(extrafont)
+
+loadfonts(device="win")
+
+usagePrincipalMoto$group <- factor(usagePrincipalMoto$group, levels = rev(usagePrincipalMoto$group))
+
+
+ggplot(data = usagePrincipalMoto, mapping = aes(x = factor(1), y = value, fill = group)) +
+  geom_bar(width=1, stat = "identity") +
+  coord_polar(theta = "y") + 
+  scale_fill_brewer(type = "seq",direction = -1, palette= "YlGnBu", guide = F) +
+  geom_text(aes(x = c(1.3, 1.5, 1.3), 
+                y = value/2 + c(0, cumsum(value)[-length(value)]), 
+                label=paste(group,"\n",value*100, "%")), family = "Consolas")
+####################################################################################################################################################
+####################################################################################################################################################
+####################################################################################################################################################
+
+usageAutoPersonnelGlobal <- sum(usages['Usage_auto'] == 'Personnel')
+usageAutoDomicileTravailGlobal <- sum(usages['Usage_auto'] == 'Domicile-travail')
+usageAutoTravailGlobal <- sum(usages['Usage_auto'] == 'Travail')
+usageAutoCourseGlobal <- sum(usages['Usage_auto'] == 'Courses')
 
 #Camembert usage principal auto
 usagePrincipalAuto <- data.frame(
@@ -177,34 +207,6 @@ ggplot(data = usagePrincipalAuto, mapping = aes(x = factor(1), y = value, fill =
   geom_text(aes(x = c(1.3, 1.5, 1.3, 1.3), 
                 y = value/2 + c(0, cumsum(value)[-length(value)]), 
                 label=paste(group,"\n",value*100, "%")), family = "Consolas")
-
-#############################################################
-#############################################################
-#############################################################
-#Camembert usage principal moto
-usagePrincipalMoto <- data.frame(
-  group = c("Domicile-travail", "Travail", "Personnel"),
-  value = c(round((usageMotoDomicileTravailGlobal/nbUsager),4), round((usageMotoTravailGlobal/nbUsager),4),
-            round((usageMotoPersonnelGlobal/nbUsager),4))
-)
-
-library(extrafont)
-
-loadfonts(device="win")
-
-usagePrincipalMoto$group <- factor(usagePrincipalMoto$group, levels = rev(usagePrincipalMoto$group))
-
-
-ggplot(data = usagePrincipalMoto, mapping = aes(x = factor(1), y = value, fill = group)) +
-  geom_bar(width=1, stat = "identity") +
-  coord_polar(theta = "y") + 
-  scale_fill_brewer(type = "seq",direction = -1, palette= "YlGnBu", guide = F) +
-  geom_text(aes(x = c(1.3, 1.5, 1.3), 
-                y = value/2 + c(0, cumsum(value)[-length(value)]), 
-                label=paste(group,"\n",value*100, "%")), family = "Consolas")
-#############################################################
-#############################################################
-#############################################################
 
 #Camembert usage global auto
 usageGlobalAutoPerso <- round(((usageVoiture[1,][2]+usageVoiture[5,][2]+usageVoiture[6,][2])/usageVoiture[7,][2]),4)
